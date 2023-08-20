@@ -23,7 +23,7 @@ class SideBar extends StatefulWidget {
       fontSize: 12,
     ),
     this.backgroundColor = const Color(0xFFEEEEEE),
-    this.activeBackgroundColor = const Color(0xFFE7E7E7),
+    this.activeBackgroundColor = const Color.fromARGB(255, 154, 221, 174),
     this.borderColor = const Color(0xFFE7E7E7),
     this.scrollController,
     this.header,
