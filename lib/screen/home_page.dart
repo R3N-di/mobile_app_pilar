@@ -28,14 +28,14 @@ class HomePage extends StatelessWidget {
       'page': Inventaris()
     },
     {
-      'text': 'User Teknisi',
-      'icon': Icon(Icons.recent_actors),
-      'page': UserPage()
-    },
-    {
       'text': 'Perangkat\nCustomer',
       'icon': Icon(Icons.android),
       'page': Perangkat()
+    },
+    {
+      'text': 'User Teknisi',
+      'icon': Icon(Icons.recent_actors),
+      'page': UserPage()
     },
   ];
 
