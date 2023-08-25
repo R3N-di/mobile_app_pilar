@@ -40,11 +40,49 @@ class HomePage extends StatelessWidget {
   ];
 
   final List<Map<String, dynamic>> maintenance = [
-    {'text': 'Mainhole', 'icon': Icon(Icons.today), 'page': MainholePage()},
+    {
+      'text': 'Mainhole', 
+      'icon': Icon(Icons.today), 
+      'page': MainholePage()
+    },
     {
       'text': 'Kerusakan\nFO     ',
       'icon': Icon(Icons.calendar_month),
       'page': Kegiatan()
+    },
+  ];
+
+  final List<Map<String, dynamic>> datavms = [
+    {
+      'text': 'Lokasi\nVMS', 
+      'icon': Icon(Icons.today), 
+      'page': MainholePage()
+    },
+    {
+      'text': 'Spesifikasi\nVMS     ',
+      'icon': Icon(Icons.calendar_month),
+      'page': Kegiatan()
+    },
+  ];
+
+  final List<Map<String, dynamic>> lembur = [
+    {
+      'text': 'Tiket\nLembur', 
+      'icon': Icon(Icons.today), 
+      'page': MainholePage()
+    },
+    {
+      'text': 'Approve\nLembur     ',
+      'icon': Icon(Icons.calendar_month),
+      'page': Kegiatan()
+    },
+  ];
+
+  final List<Map<String, dynamic>> kasbon = [
+    {
+      'text': 'Approve\nKasbon', 
+      'icon': Icon(Icons.today), 
+      'page': MainholePage()
     },
   ];
 
@@ -69,6 +107,22 @@ class HomePage extends StatelessWidget {
                       text: 'Maintenance', page: AllKegiatanPage()),
                   SizedBox(height: 16),
                   ActivityBoxList(activities: maintenance),
+                  SizedBox(height: 16),
+                  ActivityTitleRow(
+                      text: 'Data VMS', page: AllKegiatanPage()),
+                  SizedBox(height: 16),
+                  ActivityBoxList(activities: datavms),
+                  SizedBox(height: 16),
+                  ActivityTitleRow(
+                      text: 'Lembur', page: AllKegiatanPage()),
+                  SizedBox(height: 16),
+                  ActivityBoxList(activities: lembur),
+                  SizedBox(height: 16),
+                  ActivityTitleRow(
+                      text: 'Kasbon', page: AllKegiatanPage()),
+                  SizedBox(height: 16),
+                  ActivityBoxList(activities: kasbon),
+                  SizedBox(height: 16),
                 ],
               ),
             ),
