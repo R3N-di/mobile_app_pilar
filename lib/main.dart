@@ -1,42 +1,27 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-// import 'package:mobile_app_pilar/screen/home_page.dart';
-import 'package:http/io_client.dart';
+import 'package:mobile_app_pilar/screen/home_page.dart';
+import 'package:mobile_app_pilar/widgets/app_header.dart';
 import 'content/component/footer.dart';
 import 'content/page/kegiatan.dart';
 import 'content/page/profile.dart';
 import 'content/page/ubah_password.dart';
+import 'screen/home_page.dart';
 
 void main() {
-  HttpOverrides.global = MyHttpOverrides();
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/search': (context) => KegiatanScreen(),
-        '/favorites': (context) => ProfileScreen(),
+        '/Kegiatan': (context) => KegiatanScreen(),
+        '/Profile': (context) => ProfileScreen(),
       },
     );
-  }
-}
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
   }
 }
 
@@ -57,13 +42,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter Footer Example'),
-      ),
+      appBar: AppHeader(),
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          MyContent(),
+          // MyContent(),
+          Navigator(
+            onGenerateRoute: (settings) {
+              return MaterialPageRoute(
+                builder: (context) => HomePage(),
+              );
+            },
+          ),
           Navigator(
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -85,14 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class MyContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Dashboard',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
+// class MyContent extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text(
+//         'Dashboard',
+//         style: TextStyle(fontSize: 24),
+//       ),
+//     );
+//   }
+// }

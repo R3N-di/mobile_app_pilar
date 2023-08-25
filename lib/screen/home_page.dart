@@ -14,7 +14,7 @@ import 'kegiatan/perangkat_page.dart';
 import '../widgets/activity_box/activity_box_list.dart';
 import '../widgets/activity_box/activity_title.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomePage extends StatelessWidget {
   final List<Map<String, dynamic>> kegiatan = [
     {'text': 'Jadwal', 'icon': Icon(Icons.today), 'page': Jadwal()},
     {
@@ -51,7 +51,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppHeader(),
       body: SingleChildScrollView(
         child: Column(
           children: [
