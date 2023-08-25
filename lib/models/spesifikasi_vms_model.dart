@@ -26,6 +26,9 @@ class VmsModel {
     final String createdBy;
     final String? updatedBy;
     final String? deletedBy;
+    final String namaLokasiVms;
+    final LajurLokasiVms lajurLokasiVms;
+    final String koordinatLokasiVms;
 
     VmsModel({
         required this.idVms,
@@ -44,6 +47,9 @@ class VmsModel {
         required this.createdBy,
         required this.updatedBy,
         required this.deletedBy,
+        required this.namaLokasiVms,
+        required this.lajurLokasiVms,
+        required this.koordinatLokasiVms,
     });
 
     VmsModel copyWith({
@@ -63,6 +69,9 @@ class VmsModel {
         String? createdBy,
         String? updatedBy,
         String? deletedBy,
+        String? namaLokasiVms,
+        LajurLokasiVms? lajurLokasiVms,
+        String? koordinatLokasiVms,
     }) => 
         VmsModel(
             idVms: idVms ?? this.idVms,
@@ -81,6 +90,9 @@ class VmsModel {
             createdBy: createdBy ?? this.createdBy,
             updatedBy: updatedBy ?? this.updatedBy,
             deletedBy: deletedBy ?? this.deletedBy,
+            namaLokasiVms: namaLokasiVms ?? this.namaLokasiVms,
+            lajurLokasiVms: lajurLokasiVms ?? this.lajurLokasiVms,
+            koordinatLokasiVms: koordinatLokasiVms ?? this.koordinatLokasiVms,
         );
 
     factory VmsModel.fromJson(Map<String, dynamic> json) => VmsModel(
@@ -100,6 +112,9 @@ class VmsModel {
         createdBy: json["created_by"],
         updatedBy: json["updated_by"],
         deletedBy: json["deleted_by"],
+        namaLokasiVms: json["nama_lokasi_vms"],
+        lajurLokasiVms: lajurLokasiVmsValues.map[json["lajur_lokasi_vms"]]!,
+        koordinatLokasiVms: json["koordinat_lokasi_vms"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -119,6 +134,9 @@ class VmsModel {
         "created_by": createdBy,
         "updated_by": updatedBy,
         "deleted_by": deletedBy,
+        "nama_lokasi_vms": namaLokasiVms,
+        "lajur_lokasi_vms": lajurLokasiVmsValues.reverse[lajurLokasiVms],
+        "koordinat_lokasi_vms": koordinatLokasiVms,
     };
 }
 
@@ -128,6 +146,16 @@ enum DeletedAtEnum {
 
 final deletedAtEnumValues = EnumValues({
     "null": DeletedAtEnum.NULL
+});
+
+enum LajurLokasiVms {
+    LAJUR_A,
+    LAJUR_B
+}
+
+final lajurLokasiVmsValues = EnumValues({
+    "LAJUR A": LajurLokasiVms.LAJUR_A,
+    "LAJUR B": LajurLokasiVms.LAJUR_B
 });
 
 class EnumValues<T> {
