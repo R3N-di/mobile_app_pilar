@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app_pilar/screen/maintenance/mainhole_page.dart';
+import 'package:mobile_app_pilar/screen/vms/lokasi_vms_page.dart';
+import 'package:mobile_app_pilar/screen/vms/spesifikasi_vms_page.dart';
 import '../widgets/app_header.dart';
 import '../widgets/auto_scroll_header.dart';
 
@@ -56,12 +58,12 @@ class HomePage extends StatelessWidget {
     {
       'text': 'Lokasi\nVMS', 
       'icon': Icon(Icons.today), 
-      'page': MainholePage()
+      'page': LokasiVMSPage()
     },
     {
       'text': 'Spesifikasi\nVMS     ',
       'icon': Icon(Icons.calendar_month),
-      'page': Kegiatan()
+      'page': VMSPage()
     },
   ];
 

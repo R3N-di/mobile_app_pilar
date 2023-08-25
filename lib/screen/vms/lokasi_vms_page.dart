@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app_pilar/models/lokasi_vms_model.dart';
 import 'package:mobile_app_pilar/widgets/app_header.dart';
 import 'package:mobile_app_pilar/constant/colors.dart';
 import 'package:mobile_app_pilar/models/mainhole.model.dart';
-import 'package:mobile_app_pilar/services/mainhole_service.dart';
+import 'package:mobile_app_pilar/services/lokasi_vms_service.dart';
 
-class MainholePage extends StatefulWidget {
-  const MainholePage({super.key});
+class LokasiVMSPage extends StatefulWidget {
+  const LokasiVMSPage({super.key});
 
   @override
-  _MainholePageState createState() => _MainholePageState();
+  _LokasiVmsPageState createState() => _LokasiVmsPageState();
 }
 
-class _MainholePageState extends State<MainholePage> {
+class _LokasiVmsPageState extends State<LokasiVMSPage> {
   @override
   void initState() {
-    data = MainholeService().getMainhole();
+    data = LokasiVmsService().getLokasiVms();
     data.then((value) {
       setState(() {
         data2 = value;
@@ -24,7 +25,7 @@ class _MainholePageState extends State<MainholePage> {
   }
 
   late Future data;
-  List<MainholeModel> data2 = [];
+  List<LokasiVmsModel> data2 = [];
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class _MainholePageState extends State<MainholePage> {
                 itemCount: data2.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(data2[index].lokasi),
+                    title: Text(data2[index].namaLokasiVms),
                   );
                 },
               ));
