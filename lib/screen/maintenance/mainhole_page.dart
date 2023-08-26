@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app_pilar/constant/colors.dart';
-import 'package:mobile_app_pilar/models/mainhole.model.dart';
+import 'package:mobile_app_pilar/models/mainhole_model.dart';
 import 'package:mobile_app_pilar/services/mainhole_service.dart';
 
 class MainholePage extends StatefulWidget {
@@ -21,7 +21,6 @@ class _MainholePageState extends State<MainholePage> {
         data2 = value;
       });
     });
-    print(data2);
     super.initState();
   }
 
@@ -87,11 +86,10 @@ class _MyDataTableWidgetState extends State<MyDataTableWidget> {
     dataService.then((value) {
       setState(() {
         dataMainhole = value;
-        print(["Data Mainhole", dataMainhole]);
         final List<DataRow> newDataRows = dataMainhole.map((data) {
           return DataRow(cells: [
             DataCell(Text(data.lokasi)),
-            DataCell(Text(data.posisi.toString())),
+            DataCell(Text((data.posisi).toString())),
             DataCell(Text(data.bulan)),
           ]);
         }).toList();
