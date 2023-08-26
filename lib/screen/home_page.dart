@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
     {
       'text': 'Lokasi\nVMS', 
       'icon': Icon(Icons.today), 
-      'page': LokasiVMSPage()
+      'page': LokasiVmsPage()
     },
     {
       'text': 'Spesifikasi\nVMS     ',
