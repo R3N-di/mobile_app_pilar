@@ -11,7 +11,7 @@ class LokasiVmsPage extends StatefulWidget {
 }
 
 class _LokasiVmsState extends State<LokasiVmsPage> {
-  List<LokasiVmsData> LokasiVmsList = []; // Menggunakan list kosong sebagai awalan
+  List<LokasiVmsData> lokasiVmsList = [];
 
   TextEditingController searchController = TextEditingController();
   List<LokasiVmsData> filteredLokasiVms = [];
@@ -19,34 +19,36 @@ class _LokasiVmsState extends State<LokasiVmsPage> {
   @override
   void initState() {
     super.initState();
-    data = LokasiVmsService().getLokasiVms();
-    data.then((value) {
-      setState(() {
-        data2 = value;
-        LokasiVmsList = data2
-            .map((item) =>
-                LokasiVmsData(item.namaLokasiVms, item.lajurLokasiVms.toString(), item.koordinatLokasiVms))
-            .toList();
-      });
+    _fetchData();
+  }
+
+  _fetchData() async {
+    List<LokasiVmsModel> data2 = await LokasiVmsService().getLokasiVms();
+    setState(() {
+      lokasiVmsList = data2
+          .map((item) =>
+              LokasiVmsData(item.namaLokasiVms, item.lajurLokasiVms.toString(), item.koordinatLokasiVms))
+          .toList();
+      filteredLokasiVms = lokasiVmsList; // Mengisi filteredLokasiVms dengan semua data awal
     });
   }
 
-  late Future data;
-  List<LokasiVmsModel> data2 = [];
-
   void _filterLokasiVms(String query) {
     setState(() {
-      filteredLokasiVms = LokasiVmsList
-          .where((LokasiVms) =>
-              LokasiVms.nama_lokasi_vms.toLowerCase().contains(query.toLowerCase()))
+      filteredLokasiVms = lokasiVmsList
+          .where((lokasiVms) =>
+              lokasiVms.nama_lokasi_vms.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
 
   void _clearSearch() {
     searchController.clear();
-    _filterLokasiVms('');
-    // Hapus fokus dari tombol hapus
+    if (searchController.text.isEmpty) {
+      setState(() {
+        filteredLokasiVms = lokasiVmsList;
+      });
+    }
     FocusScope.of(context).requestFocus(FocusNode());
   }
 
@@ -81,20 +83,18 @@ class _LokasiVmsState extends State<LokasiVmsPage> {
               ),
             ),
             Container(
-              // height: 100, // Tinggi yang diinginkan
               child: DataTable(
-                columnSpacing: 35, // Jarak antar kolom
-                // dataRowHeight: 100, // Tinggi baris
+                columnSpacing: 35,
                 columns: [
                   DataColumn(label: Text('NAMA LOKASI')),
                   DataColumn(label: Text('LAJUR LOKASI')),
                   DataColumn(label: Text('KOORDINAT LOKASI')),
                 ],
                 rows: filteredLokasiVms
-                    .map((LokasiVms) => DataRow(cells: [
-                          DataCell(Text(LokasiVms.nama_lokasi_vms)),
-                          DataCell(Text(LokasiVms.lokasi_vms)),
-                          DataCell(Text(LokasiVms.koordinat_lokasi_vms)),
+                    .map((lokasiVms) => DataRow(cells: [
+                          DataCell(Text(lokasiVms.nama_lokasi_vms)),
+                          DataCell(Text(lokasiVms.lokasi_vms)),
+                          DataCell(Text(lokasiVms.koordinat_lokasi_vms)),
                         ]))
                     .toList(),
               ),
@@ -112,8 +112,4 @@ class LokasiVmsData {
   final String koordinat_lokasi_vms;
 
   LokasiVmsData(this.nama_lokasi_vms, this.lokasi_vms, this.koordinat_lokasi_vms);
-}
-
-void main() {
-  runApp(MaterialApp(home: LokasiVmsPage()));
 }
