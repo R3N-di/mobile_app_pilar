@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app_pilar/widgets/app_header.dart';
 import 'package:mobile_app_pilar/constant/colors.dart';
-import 'package:mobile_app_pilar/models/mainhole.model.dart';
+import 'package:mobile_app_pilar/models/mainhole_model.dart';
 import 'package:mobile_app_pilar/services/mainhole_service.dart';
 
 class MainholePage extends StatefulWidget {

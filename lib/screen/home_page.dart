@@ -16,7 +16,11 @@ import '../widgets/activity_box/activity_title.dart';
 
 class HomePage extends StatelessWidget {
   final List<Map<String, dynamic>> kegiatan = [
-    {'text': 'Jadwal', 'icon': Icon(Icons.today), 'page': Jadwal()},
+    {
+      'text': 'Jadwal',
+      'icon': Icon(Icons.today),
+      'page': JadwalPage()
+    },
     {
       'text': 'Kegiatan\nHarian',
       'icon': Icon(Icons.calendar_month),
@@ -41,8 +45,8 @@ class HomePage extends StatelessWidget {
 
   final List<Map<String, dynamic>> maintenance = [
     {
-      'text': 'Mainhole', 
-      'icon': Icon(Icons.today), 
+      'text': 'Mainhole',
+      'icon': Icon(Icons.today),
       'page': MainholePage()
     },
     {
@@ -54,8 +58,8 @@ class HomePage extends StatelessWidget {
 
   final List<Map<String, dynamic>> datavms = [
     {
-      'text': 'Lokasi\nVMS', 
-      'icon': Icon(Icons.today), 
+      'text': 'Lokasi\nVMS',
+      'icon': Icon(Icons.today),
       'page': MainholePage()
     },
     {
@@ -67,8 +71,8 @@ class HomePage extends StatelessWidget {
 
   final List<Map<String, dynamic>> lembur = [
     {
-      'text': 'Tiket\nLembur', 
-      'icon': Icon(Icons.today), 
+      'text': 'Tiket\nLembur',
+      'icon': Icon(Icons.today),
       'page': MainholePage()
     },
     {
@@ -80,8 +84,8 @@ class HomePage extends StatelessWidget {
 
   final List<Map<String, dynamic>> kasbon = [
     {
-      'text': 'Approve\nKasbon', 
-      'icon': Icon(Icons.today), 
+      'text': 'Approve\nKasbon',
+      'icon': Icon(Icons.today),
       'page': MainholePage()
     },
   ];
