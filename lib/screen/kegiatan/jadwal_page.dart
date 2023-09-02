@@ -48,10 +48,10 @@ class _JadwalPageState extends State<JadwalPage> {
           return DataRow(cells: [
             DataCell(Text(
               data.namaJadwal,
-              style: TextStyle(fontSize: 6),
+              style: TextStyle(fontSize: 12),
             )),
             DataCell(Text(data.namaPelanggan)),
-            DataCell(Text(data.statusJadwal)),
+            // DataCell(Text(data.statusJadwal)),
             // DataCell(Text(data.tglMulai.toString())),
             // DataCell(Text(data.tglSelesai.toString())),
           ]);
@@ -120,12 +120,12 @@ class _JadwalPageState extends State<JadwalPage> {
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: DataTable(
-                  columnSpacing: 0,
+                  columnSpacing: 8,
                   dataRowHeight: 30,
                   columns: [
                     DataColumn(label: Text('Nama Jadwal')),
                     DataColumn(label: Text('Nama Pelanggan')),
-                    DataColumn(label: Text('Status Jadwal')),
+                    // DataColumn(label: Text('Status Jadwal')),
                     // Add more DataColumn widgets here if needed
                   ],
                   rows: filteredJadwal.map((row) {

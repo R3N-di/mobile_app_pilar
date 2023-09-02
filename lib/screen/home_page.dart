@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
     {
       'text': 'Perangkat\nCustomer',
       'icon': Icon(Icons.android),
-      'page': Perangkat()
+      'page': PerangkatCustomerPage()
     },
     {
       'text': 'User Teknisi',
