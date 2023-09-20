@@ -1,17 +1,17 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, sort_child_properties_last, unnecessary_this, avoid_print
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, sort_child_properties_last, unnecessary_this, avoid_print, depend_on_referenced_packages
 
-import 'dart:developer';
-import 'package:geolocator/geolocator.dart';
 import 'package:mobile_app_pilar/services/perangkat_customer_service_id_keluar.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import 'package:flutter/material.dart';
-import 'package:accordion/accordion.dart';
-import 'package:accordion/controllers.dart';
 import 'package:mobile_app_pilar/constant/colors.dart';
 import 'package:mobile_app_pilar/services/perangkat_customer_service.dart';
 
-import '../../widgets/app_header.dart';
+import 'package:flutter/material.dart';
+import 'package:accordion/accordion.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:mobile_app_pilar/widgets/accordion/expandable_tile_section.dart';
+import 'package:mobile_app_pilar/widgets/search_input.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:number_paginator/number_paginator.dart';
 
 class PerangkatCustomerPage extends StatefulWidget {
   @override
@@ -21,11 +21,18 @@ class PerangkatCustomerPage extends StatefulWidget {
 class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   late Future dataPrimary;
   late Future dataSecondary;
+  late Future dataForUpdate;
   TextEditingController searchController = TextEditingController();
   TextEditingController inputController = TextEditingController();
   List<dynamic> dataList = [];
   List<dynamic> dataSecondaryList = [];
+  List<dynamic> dataForUpdateList = [];
   List<dynamic> filteredData = [];
+  dynamic selectedValueIdKeluar;
+  int _currentPage = 1;
+  int _defaultPage = 1;
+  int _limit = 10;
+  bool hasMore = true;
 
   // SECTION PROPERTY dan METHOD Perangkat Customer
   String? idKeluar;
@@ -33,22 +40,6 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   String? koordinatPerangkat;
   String? usernamePerangkat;
   String? passwordPerangkat;
-
-  getNamaTempat(namaTempat) {
-    this.namaTempat = namaTempat;
-  }
-
-  getKoordinatPerangkat(koordinatPerangkat) {
-    this.koordinatPerangkat = koordinatPerangkat;
-  }
-
-  getUsernamePerangkat(usernamePerangkat) {
-    this.usernamePerangkat = usernamePerangkat;
-  }
-
-  getPasswordPerangkat(passwordPerangkat) {
-    this.passwordPerangkat = passwordPerangkat;
-  }
   // !SECTION PROPERTY dan METHOD Perangkat Customer
 
   // SECTION Untuk Dapet Koordinat
@@ -59,8 +50,10 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   void _filterData(String query) {
     setState(() {
       filteredData = dataList
-          .where(
-              (data) => data.namaPelanggan.toString().toLowerCase().contains(query.toLowerCase()))
+          .where((data) => data.namaPelanggan
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -82,11 +75,12 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   @override
   void initState() {
     // TODO: implement initState
-    dataPrimary = PerangkatCustomerService().getData();
-    dataPrimary.then((value) {
+    dataPrimary = PerangkatCustomerService().getData(_currentPage, _limit);
+    dataPrimary.then((data) {
       setState(() {
-        dataList = value;
-        filteredData = value;
+        _currentPage++;
+        dataList = data;
+        filteredData = data;
       });
     });
     dataSecondary = PerangkatCustomerIdKeluarService().getData();
@@ -98,14 +92,10 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
     super.initState();
   }
 
-  final _headerStyle =
-      const TextStyle(color: Color(0xffffffff), fontSize: 15, fontWeight: FontWeight.bold);
-  final _contentStyleHeader =
-      const TextStyle(color: Color(0xff999999), fontSize: 14, fontWeight: FontWeight.w700);
-  final _contentStyle =
-      const TextStyle(color: Color(0xff999999), fontSize: 14, fontWeight: FontWeight.normal);
-  final _loremIpsum =
-      '''Lorem ipsum is typically a corrupted version of 'De finibus bonorum et malorum', a 1st century BC text by the Roman statesman and philosopher Cicero, with words altered, added, and removed to make it nonsensical and improper Latin.''';
+  final _headerStyle = const TextStyle(
+      color: Color(0xffffffff), fontSize: 15, fontWeight: FontWeight.bold);
+  final _contentStyle = const TextStyle(
+      color: Color(0xff999999), fontSize: 14, fontWeight: FontWeight.normal);
 
   _launchURL(String urli) async {
     final Uri url = Uri.parse(urli);
@@ -115,9 +105,12 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   }
 
   Future refresh() async {
-    dataPrimary = PerangkatCustomerService().getData();
+    filteredData = [];
+    dataList = [];
+    dataPrimary = PerangkatCustomerService().getData(_defaultPage, _limit);
     dataPrimary.then((value) {
       setState(() {
+        _currentPage = 2;
         dataList = value;
         filteredData = value;
       });
@@ -161,8 +154,8 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
         floatingActionButton: FloatingActionButton(
           child: Container(
             padding: EdgeInsets.all(2),
-            decoration:
-                BoxDecoration(color: primaryGreen, borderRadius: BorderRadius.circular(100)),
+            decoration: BoxDecoration(
+                color: primaryGreen, borderRadius: BorderRadius.circular(100)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: Container(
@@ -181,368 +174,22 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
           foregroundColor: Colors.transparent,
           backgroundColor: black,
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniStartFloat,
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniStartFloat,
         floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
         body: Stack(
           children: [
             RefreshIndicator(
-              onRefresh: refresh,
-              child: (filteredData.length == 0)
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.black,
-                      ),
-                    )
-                  : Accordion(
-                      paddingListTop: 90,
-                      paddingListBottom: 90,
-                      header: Text('Perangkat Customer'),
-                      scaleWhenAnimating: false,
-                      contentBorderColor: Color.fromARGB(255, 106, 231, 92),
-                      children: filteredData.map((data) {
-                        return AccordionSection(
-                          headerBackgroundColor: Colors.black,
-                          headerBackgroundColorOpened: Color.fromARGB(255, 106, 231, 92),
-                          header: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(data.namaPelanggan, style: _headerStyle),
-                              SizedBox(
-                                height: 4,
-                              ),
-                              Text(data.namaItem, style: _contentStyle),
-                              SizedBox(
-                                height: 4,
-                              ),
-                              (data.namaLokasi == '')
-                                  ? Container()
-                                  : Text(data.namaLokasi, style: _contentStyle),
-                            ],
-                          ),
-                          content: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateColor.resolveWith(
-                                            (states) => primaryGreen),
-                                      ),
-                                      onPressed: () => _launchURL(
-                                          "https://www.google.com/maps/search/" +
-                                              data.lokasiSerialNumber),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.location_on, color: textWhite),
-                                          Text(
-                                            'Map',
-                                            style: TextStyle(color: textWhite),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 16,
-                                  ),
-                                  Flexible(
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                        alignment: Alignment.centerRight,
-                                        backgroundColor: MaterialStateColor.resolveWith(
-                                            (states) => primaryGreen),
-                                      ),
-                                      onPressed: () => showDialog<String>(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('Gambar Perangkat'),
-                                              // content: Image.asset(
-                                              //     "assets/images/perangkat_customer/" +
-                                              //         (data.gambarSerialNumber).toString())
-                                              content: Image.network(
-                                                  "https://app.pilarsolusi.co.id/administrasi/gambar/serial_number/${(data.gambarSerialNumber).toString()}"),
-                                            );
-                                          }),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.image_rounded, color: textWhite),
-                                          Text(
-                                            'Image',
-                                            style: TextStyle(color: textWhite),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Container(
-                                margin: EdgeInsets.symmetric(vertical: 12),
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                    color: primaryGreen,
-                                    borderRadius: BorderRadius.all(Radius.circular(4))),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                        child: Text(
-                                      'Username : ',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                    )),
-                                    SizedBox(
-                                      width: 16,
-                                    ),
-                                    Expanded(child: Text(data.usernameSerialNumber)),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(bottom: 12),
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                    color: primaryGreen,
-                                    borderRadius: BorderRadius.all(Radius.circular(4))),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                        child: Text(
-                                      'Password : ',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                    )),
-                                    SizedBox(
-                                      width: 16,
-                                    ),
-                                    Expanded(child: Text(data.passwordSerialNumber)),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateColor.resolveWith(
-                                            (states) => Colors.amber),
-                                      ),
-                                      onPressed: () => showModalBottomSheet(
-                                          context: context,
-                                          builder: (context) => Padding(
-                                                padding: const EdgeInsets.all(18.0),
-                                                child: ListView(
-                                                  scrollDirection: Axis.vertical,
-                                                  children: [
-                                                    Center(
-                                                      child: Text(
-                                                        'Tambah Data Perangkat Customer',
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight: FontWeight.w600),
-                                                      ),
-                                                    ),
-                                                    Column(
-                                                      children: [
-                                                        Text(
-                                                            'Lokasi Pelanggan / Alamat Pelanggan / jml foto yang dapat di masukan'),
-                                                        DropdownButton(
-                                                          items: dataSecondaryList.map((data) {
-                                                            return DropdownMenuItem(
-                                                              value: data.idKeluar,
-                                                              child: Text(
-                                                                  '${data.namaPelanggan} - ${data.namaItem} : ${data.qty}'),
-                                                            );
-                                                          }).toList(),
-                                                          value: idKeluar ?? '',
-                                                          onChanged: (newVal) async {
-                                                            setState(() {
-                                                              idKeluar = newVal.toString();
-                                                            });
-                                                            print(idKeluar);
-                                                          },
-                                                          isExpanded: true,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 12,
-                                                    ),
-                                                    TextFormField(
-                                                      decoration: InputDecoration(
-                                                        labelText: 'Nama Tempat',
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                                color: Colors.blue, width: 2.0)),
-                                                        suffixIcon: IconButton(
-                                                          icon: Icon(Icons.clear),
-                                                          onPressed: _clearSearch,
-                                                        ),
-                                                      ),
-                                                      onChanged: (String namaTempat) {
-                                                        getNamaTempat(namaTempat);
-                                                      },
-                                                    ),
-                                                    SizedBox(
-                                                      height: 12,
-                                                    ),
-                                                    TextFormField(
-                                                      controller: TextEditingController(
-                                                          text: (lat == '' && long == '')
-                                                              ? ''
-                                                              : "$lat,$long"),
-                                                      decoration: InputDecoration(
-                                                        labelText: 'Koordinat Perangkat',
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                                color: Colors.blue, width: 2.0)),
-                                                        suffixIcon: IconButton(
-                                                          icon: Icon(Icons.clear),
-                                                          onPressed: _clearSearch,
-                                                        ),
-                                                      ),
-                                                      onChanged: (String koordinatPerangkat) async {
-                                                        getKoordinatPerangkat(koordinatPerangkat);
-                                                      },
-                                                    ),
-                                                    ElevatedButton(
-                                                        onPressed: () async {
-                                                          print('Ambil Lokasi Sekarang');
-                                                          print('Lokasi Sekarang = $lat,$long');
-                                                          _getCurrentLocation().then((value) {
-                                                            lat = '${value.latitude}';
-                                                            long = '${value.longitude}';
-                                                          });
-                                                        },
-                                                        child: Text('Ambil Lokasi Sekarang')),
-                                                    SizedBox(
-                                                      height: 12,
-                                                    ),
-                                                    TextFormField(
-                                                      decoration: InputDecoration(
-                                                        labelText: 'Username Perangkat',
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                                color: Colors.blue, width: 2.0)),
-                                                        suffixIcon: IconButton(
-                                                          icon: Icon(Icons.clear),
-                                                          onPressed: _clearSearch,
-                                                        ),
-                                                      ),
-                                                      onChanged: (String usernamePerangkat) {
-                                                        getUsernamePerangkat(usernamePerangkat);
-                                                      },
-                                                    ),
-                                                    SizedBox(
-                                                      height: 12,
-                                                    ),
-                                                    TextFormField(
-                                                      decoration: InputDecoration(
-                                                        labelText: 'Password Perangkat',
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                                color: Colors.blue, width: 2.0)),
-                                                        suffixIcon: IconButton(
-                                                          icon: Icon(Icons.clear),
-                                                          onPressed: _clearSearch,
-                                                        ),
-                                                      ),
-                                                      onChanged: (String passwordPerangkat) {
-                                                        getPasswordPerangkat(passwordPerangkat);
-                                                      },
-                                                    ),
-                                                    SizedBox(
-                                                      height: 12,
-                                                    ),
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        PerangkatCustomerService().postData(
-                                                            (this.idKeluar).toString(),
-                                                            (this.namaTempat).toString(),
-                                                            (this.koordinatPerangkat).toString(),
-                                                            (this.usernamePerangkat).toString(),
-                                                            (this.passwordPerangkat).toString());
-                                                      },
-                                                      child: Text('Tambah Data'),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.edit, color: textWhite),
-                                          Text(
-                                            'Edit',
-                                            style: TextStyle(color: textWhite),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 16,
-                                  ),
-                                  Flexible(
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                        alignment: Alignment.centerRight,
-                                        backgroundColor:
-                                            MaterialStateColor.resolveWith((states) => Colors.red),
-                                      ),
-                                      onPressed: () => showDialog<String>(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('Hapus Perangkat'),
-                                              content: Text(''),
-                                              actionsAlignment: MainAxisAlignment.spaceAround,
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: Text('Batal')),
-                                                TextButton(
-                                                    onPressed: () async {
-                                                      PerangkatCustomerService()
-                                                          .deleteData(data.idSerialNumber);
-
-                                                      refresh();
-                                                    },
-                                                    child: Text(
-                                                      'Hapus',
-                                                      style: TextStyle(color: Colors.red),
-                                                    ))
-                                              ],
-                                            );
-                                          }),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.delete, color: textWhite),
-                                          Text(
-                                            'Hapus',
-                                            style: TextStyle(color: textWhite),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                          contentHorizontalPadding: 20,
-                          contentBorderWidth: 1,
-                          // onOpenSection: () => print('onOpenSection ...'),
-                          // onCloseSection: () => print('onCloseSection ...'),
-                        );
-                      }).toList()),
-            ),
+                onRefresh: refresh,
+                child: (filteredData.length == 0)
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.black,
+                        ),
+                      )
+                    : ExpandableTileSection(
+                        data: filteredData,
+                      )),
             Positioned(
               top: 20,
               left: 20,
@@ -568,29 +215,107 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                             child: Text(
                                               'Tambah Data Perangkat Customer',
                                               style: TextStyle(
-                                                  fontSize: 20, fontWeight: FontWeight.w600),
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                           ),
-                                          Column(
-                                            children: [
-                                              Text(
-                                                  'Lokasi Pelanggan / Alamat Pelanggan / jml foto yang dapat di masukan'),
-                                              DropdownButton(
-                                                items: dataSecondaryList.map((data) {
-                                                  return DropdownMenuItem(
-                                                    value: data.idKeluar,
-                                                    child: Text(
-                                                        '${data.namaPelanggan} - ${data.namaItem} : ${data.qty}'),
-                                                  );
-                                                }).toList(),
-                                                onChanged: (newVal) {
-                                                  setState(() {
-                                                    idKeluar = newVal.toString();
-                                                  });
-                                                },
-                                                isExpanded: true,
+                                          DropdownSearch<dynamic>(
+                                            clearButtonProps: ClearButtonProps(
+                                                icon: Icon(Icons.clear)),
+                                            dropdownBuilder: (context,
+                                                    selectedItem) =>
+                                                Text(((selectedItem
+                                                                ?.namaPelanggan ==
+                                                            null) ||
+                                                        (selectedItem
+                                                                ?.namaItem ==
+                                                            null) ||
+                                                        (selectedItem?.qty ==
+                                                            null))
+                                                    ? 'Pilih..'
+                                                    : ((selectedItem?.namaPelanggan)
+                                                            .toString() +
+                                                        ' | ' +
+                                                        (selectedItem?.namaItem)
+                                                            .toString() +
+                                                        ' : ' +
+                                                        (selectedItem.qty)
+                                                            .toString())),
+                                            popupProps: PopupProps.dialog(
+                                              itemBuilder:
+                                                  (context, item, isSelected) =>
+                                                      ListTile(
+                                                title: Text((item.namaPelanggan)
+                                                        .toString() +
+                                                    ' | ' +
+                                                    (item.namaItem).toString() +
+                                                    ' : ' +
+                                                    (item.qty).toString()),
                                               ),
-                                            ],
+                                              listViewProps: ListViewProps(
+                                                scrollDirection: Axis.vertical,
+                                              ),
+                                              showSearchBox: true,
+                                              searchFieldProps: TextFieldProps(
+                                                  decoration: InputDecoration(
+                                                hintText: 'Cari...',
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.blue,
+                                                    width: 2.0,
+                                                  ),
+                                                ),
+                                              )),
+                                              title: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 12,
+                                                    bottom: 0,
+                                                    left: 12,
+                                                    right: 4),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text('Lokasi Pelanggan'),
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        icon: Icon(Icons.clear))
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            items:
+                                                dataSecondaryList, // Use dataSecondaryList here
+                                            dropdownDecoratorProps:
+                                                DropDownDecoratorProps(
+                                              dropdownSearchDecoration:
+                                                  InputDecoration(
+                                                labelText:
+                                                    "Lokasi Pelanggan / Alamat Pelanggan / jml foto yang dapat di masukan",
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.blue,
+                                                    width: 2.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedValueIdKeluar =
+                                                    value.idKeluar;
+                                                this.idKeluar = value.idKeluar;
+                                              });
+                                              print(value.idKeluar ?? null);
+                                            },
+                                            selectedItem:
+                                                selectedValueIdKeluar, // Set the selected value
                                           ),
                                           SizedBox(
                                             height: 12,
@@ -599,15 +324,16 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                             decoration: InputDecoration(
                                               labelText: 'Nama Tempat',
                                               focusedBorder: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(color: Colors.blue, width: 2.0)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.blue,
+                                                      width: 2.0)),
                                               suffixIcon: IconButton(
                                                 icon: Icon(Icons.clear),
                                                 onPressed: _clearSearch,
                                               ),
                                             ),
                                             onChanged: (String namaTempat) {
-                                              getNamaTempat(namaTempat);
+                                              this.namaTempat = namaTempat;
                                             },
                                           ),
                                           SizedBox(
@@ -615,31 +341,37 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                           ),
                                           TextFormField(
                                             controller: TextEditingController(
-                                                text:
-                                                    (lat == '' && long == '') ? '' : "$lat,$long"),
+                                                text: (lat == '' && long == '')
+                                                    ? ''
+                                                    : "$lat,$long"),
                                             decoration: InputDecoration(
                                               labelText: 'Koordinat Perangkat',
                                               focusedBorder: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(color: Colors.blue, width: 2.0)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.blue,
+                                                      width: 2.0)),
                                               suffixIcon: IconButton(
                                                 icon: Icon(Icons.clear),
                                                 onPressed: _clearSearch,
                                               ),
                                             ),
-                                            onChanged: (String koordinatPerangkat) {
-                                              getKoordinatPerangkat(koordinatPerangkat);
+                                            onChanged:
+                                                (String koordinatPerangkat) {
+                                              this.koordinatPerangkat =
+                                                  koordinatPerangkat;
                                             },
                                           ),
                                           ElevatedButton(
                                               onPressed: () {
                                                 print('Ambil Lokasi Sekarang');
-                                                _getCurrentLocation().then((value) {
+                                                _getCurrentLocation()
+                                                    .then((value) {
                                                   lat = '${value.latitude}';
                                                   long = '${value.longitude}';
                                                 });
                                               },
-                                              child: Text('Ambil Lokasi Sekarang')),
+                                              child: Text(
+                                                  'Ambil Lokasi Sekarang')),
                                           SizedBox(
                                             height: 12,
                                           ),
@@ -647,15 +379,18 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                             decoration: InputDecoration(
                                               labelText: 'Username Perangkat',
                                               focusedBorder: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(color: Colors.blue, width: 2.0)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.blue,
+                                                      width: 2.0)),
                                               suffixIcon: IconButton(
                                                 icon: Icon(Icons.clear),
                                                 onPressed: _clearSearch,
                                               ),
                                             ),
-                                            onChanged: (String usernamePerangkat) {
-                                              getUsernamePerangkat(usernamePerangkat);
+                                            onChanged:
+                                                (String usernamePerangkat) {
+                                              this.usernamePerangkat =
+                                                  usernamePerangkat;
                                             },
                                           ),
                                           SizedBox(
@@ -665,15 +400,18 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                             decoration: InputDecoration(
                                               labelText: 'Password Perangkat',
                                               focusedBorder: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(color: Colors.blue, width: 2.0)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.blue,
+                                                      width: 2.0)),
                                               suffixIcon: IconButton(
                                                 icon: Icon(Icons.clear),
                                                 onPressed: _clearSearch,
                                               ),
                                             ),
-                                            onChanged: (String passwordPerangkat) {
-                                              getPasswordPerangkat(passwordPerangkat);
+                                            onChanged:
+                                                (String passwordPerangkat) {
+                                              this.passwordPerangkat =
+                                                  passwordPerangkat;
                                             },
                                           ),
                                           SizedBox(
@@ -681,12 +419,18 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                           ),
                                           ElevatedButton(
                                             onPressed: () {
-                                              PerangkatCustomerService().postData(
-                                                  (this.idKeluar).toString(),
-                                                  (this.namaTempat).toString(),
-                                                  (this.koordinatPerangkat).toString(),
-                                                  (this.usernamePerangkat).toString(),
-                                                  (this.passwordPerangkat).toString());
+                                              PerangkatCustomerService()
+                                                  .postData(
+                                                      (this.idKeluar)
+                                                          .toString(),
+                                                      (this.namaTempat)
+                                                          .toString(),
+                                                      (this.koordinatPerangkat)
+                                                          .toString(),
+                                                      (this.usernamePerangkat)
+                                                          .toString(),
+                                                      (this.passwordPerangkat)
+                                                          .toString());
                                             },
                                             child: Text('Tambah Data'),
                                           ),
@@ -696,52 +440,242 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                           },
                           child: Icon(Icons.add),
                           style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateColor.resolveWith((states) => primaryGreen))),
+                              backgroundColor: MaterialStateColor.resolveWith(
+                                  (states) => primaryGreen))),
                     ),
                   ),
                   Expanded(
                     flex: 5,
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                      ),
-                      child: TextField(
-                        onChanged: _filterData,
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
-                          fillColor: primaryGreen,
-                          border: OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: _clearSearch,
-                          ),
-                        ),
-                      ),
+                    child: SearchInput(
+                      onChanged: _filterData,
+                      controller: searchController,
+                      clearSearch: _clearSearch,
                     ),
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              left: 20,
-              bottom: 20,
-              right: 20,
-              child: Container(
-                width: 50,
-                height: 50,
-                color: Colors.amber,
-                child: Text(
-                  'Rencananya Pagination',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-                ),
               ),
             ),
           ],
         ));
   }
 }
+
+
+// class AddPerangkatCustomer extends StatefulWidget {
+
+//   List<dynamic> dropdownSearchItems;
+//   dynamic selectedValueIdKeluar;
+
+//   String namaTempat = '';
+
+//   AddPerangkatCustomer({super.key, required this.dropdownSearchItems});
+
+//   @override
+//   State<AddPerangkatCustomer> createState() => _AddPerangkatCustomerState();
+// }
+
+// class _AddPerangkatCustomerState extends State<AddPerangkatCustomer> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: EdgeInsets.all(18.0),
+//       child: ListView(
+//         scrollDirection: Axis.vertical,
+//         children: [
+//           Center(
+//             child: Text(
+//               'Tambah Data Perangkat Customer',
+//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+//             ),
+//           ),
+//           DropdownSearch<dynamic>(
+//             clearButtonProps: ClearButtonProps(icon: Icon(Icons.clear)),
+//             dropdownBuilder: (context, selectedItem) => Text(
+//                 ((selectedItem?.namaPelanggan == null) ||
+//                         (selectedItem?.namaItem == null) ||
+//                         (selectedItem?.qty == null))
+//                     ? 'Pilih..'
+//                     : ((selectedItem?.namaPelanggan).toString() +
+//                         ' | ' +
+//                         (selectedItem?.namaItem).toString() +
+//                         ' : ' +
+//                         (selectedItem.qty).toString())),
+//             popupProps: PopupProps.dialog(
+//               itemBuilder: (context, item, isSelected) => ListTile(
+//                 title: Text((item.namaPelanggan).toString() +
+//                     ' | ' +
+//                     (item.namaItem).toString() +
+//                     ' : ' +
+//                     (item.qty).toString()),
+//               ),
+//               listViewProps: ListViewProps(
+//                 scrollDirection: Axis.vertical,
+//               ),
+//               showSearchBox: true,
+//               searchFieldProps: TextFieldProps(
+//                   decoration: InputDecoration(
+//                 hintText: 'Cari...',
+//                 focusedBorder: OutlineInputBorder(
+//                   borderSide: BorderSide(
+//                     color: Colors.blue,
+//                     width: 2.0,
+//                   ),
+//                 ),
+//               )),
+//               title: Padding(
+//                 padding: const EdgeInsets.only(top: 12, bottom: 0, left: 12, right: 4),
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     Text('Lokasi Pelanggan'),
+//                     IconButton(
+//                         onPressed: () {
+//                           Navigator.pop(context);
+//                         },
+//                         icon: Icon(Icons.clear))
+//                   ],
+//                 ),
+//               ),
+//             ),
+//             items: this.widget.dropdownSearchItems, // Use dataSecondaryList here
+//             dropdownDecoratorProps: DropDownDecoratorProps(
+//               dropdownSearchDecoration: InputDecoration(
+//                 labelText: "Lokasi Pelanggan / Alamat Pelanggan / jml foto yang dapat di masukan",
+//                 focusedBorder: OutlineInputBorder(
+//                   borderSide: BorderSide(
+//                     color: Colors.blue,
+//                     width: 2.0,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//             onChanged: (value) {
+//               setState(() {
+//                 this.widget.selectedValueIdKeluar = value;
+//               });
+//               print(value.idKeluar ?? null);
+//             },
+//             selectedItem: this.widget.selectedValueIdKeluar, // Set the selected value
+//           ),
+//           SizedBox(
+//             height: 12,
+//           ),
+//           InputText(labelText: 'Nama Tempat', onChanged: (namaTempat) {
+//             this.widget.namaTempat = namaTempat;
+//           },toClearText: ),
+//           SizedBox(
+//             height: 12,
+//           ),
+//           TextFormField(
+//             controller: TextEditingController(text: (lat == '' && long == '') ? '' : "$lat,$long"),
+//             decoration: InputDecoration(
+//               labelText: 'Koordinat Perangkat',
+//               focusedBorder:
+//                   OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+//               suffixIcon: IconButton(
+//                 icon: Icon(Icons.clear),
+//                 onPressed: _clearSearch,
+//               ),
+//             ),
+//             onChanged: (String koordinatPerangkat) {
+//               this.koordinatPerangkat = koordinatPerangkat;
+//             },
+//           ),
+//           ElevatedButton(
+//               onPressed: () {
+//                 print('Ambil Lokasi Sekarang');
+//                 _getCurrentLocation().then((value) {
+//                   lat = '${value.latitude}';
+//                   long = '${value.longitude}';
+//                 });
+//               },
+//               child: Text('Ambil Lokasi Sekarang')),
+//           SizedBox(
+//             height: 12,
+//           ),
+//           TextFormField(
+//             decoration: InputDecoration(
+//               labelText: 'Username Perangkat',
+//               focusedBorder:
+//                   OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+//               suffixIcon: IconButton(
+//                 icon: Icon(Icons.clear),
+//                 onPressed: _clearSearch,
+//               ),
+//             ),
+//             onChanged: (String usernamePerangkat) {
+//               this.usernamePerangkat = usernamePerangkat;
+//             },
+//           ),
+//           SizedBox(
+//             height: 12,
+//           ),
+//           TextFormField(
+//             decoration: InputDecoration(
+//               labelText: 'Password Perangkat',
+//               focusedBorder:
+//                   OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+//               suffixIcon: IconButton(
+//                 icon: Icon(Icons.clear),
+//                 onPressed: _clearSearch,
+//               ),
+//             ),
+//             onChanged: (String passwordPerangkat) {
+//               this.passwordPerangkat = passwordPerangkat;
+//             },
+//           ),
+//           SizedBox(
+//             height: 12,
+//           ),
+//           ElevatedButton(
+//             onPressed: () {
+//               PerangkatCustomerService().postData(
+//                   (this.idKeluar).toString(),
+//                   (this.namaTempat).toString(),
+//                   (this.koordinatPerangkat).toString(),
+//                   (this.usernamePerangkat).toString(),
+//                   (this.passwordPerangkat).toString());
+//             },
+//             child: Text('Tambah Data'),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// class InputText extends StatefulWidget {
+//   String labelText;
+//   void Function() toClearText;
+//   void Function(String) onChanged;
+//   TextEditingController controller;
+
+//   InputText({
+//     super.key,
+//     required this.labelText,
+//     required this.toClearText,
+//     required this.onChanged,
+//     this.controller,
+//   });
+
+//   @override
+//   State<InputText> createState() => _InputTextState();
+// }
+
+// class _InputTextState extends State<InputText> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return TextFormField(
+//       decoration: InputDecoration(
+//         labelText: widget.labelText,
+//         focusedBorder:
+//             OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+//         suffixIcon: IconButton(
+//           icon: Icon(Icons.clear),
+//           onPressed: widget.toClearText,
+//         ),
+//       ),
+//       onChanged: widget.onChanged
+//     );
+//   }
+// }

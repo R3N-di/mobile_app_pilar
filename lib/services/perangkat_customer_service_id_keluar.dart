@@ -5,7 +5,7 @@ import 'package:mobile_app_pilar/models/perangkat_customer_id_keluar_model.dart'
 
 class PerangkatCustomerIdKeluarService {
   static const String _baseUrl =
-      'https://app.pilarsolusi.co.id/administrasi/api/dataPerangkatCustomerIdKeluar.php';
+      'https://app.pilarsolusi.co.id/management/administrasi/api/dataPerangkatCustomerIdKeluar.php';
 
   Future<List<PerangkatCustomerIdKeluarModel>> getData() async {
     Uri urlApi = Uri.parse(_baseUrl);
