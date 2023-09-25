@@ -10,16 +10,14 @@ class PerangkatCustomerService {
       'https://app.pilarsolusi.co.id/management/administrasi/api/dataPerangkatCustomer.php';
   Uri urlApi = Uri.parse(_baseUrl);
 
-  Future<List<PerangkatCustomerModel>> getLengthData() async {
+  Future<List<PerangkatCustomerModel>> getOneData(int id) async {
     String _baseUrl =
-        'https://app.pilarsolusi.co.id/management/administrasi/api/dataPerangkatCustomer.php?jmlData';
+        'https://app.pilarsolusi.co.id/management/administrasi/api/dataPerangkatCustomer.php?id=$id';
     Uri urlApi = Uri.parse(_baseUrl);
     final res = await http.get(urlApi);
 
     if (res.statusCode == 200) {
-      var data = json.decode(res.body);
-      print(data.jmlData);
-      return data.jmlData;
+      return perangkatCustomerModelFromJson(res.body.toString());
     } else {
       print('Failed to load Data!');
       throw Exception("Failed to load Data!");
@@ -55,11 +53,8 @@ class PerangkatCustomerService {
       'password_serial_number': passwordSerialNumber,
     });
 
-    print(res.statusCode);
-
     if (res.statusCode == 200) {
       var data = json.decode(res.body);
-      print(data);
       return data;
       // return perangkatCustomerModelFromJson(res.body.toString());
     } else {
@@ -86,7 +81,6 @@ class PerangkatCustomerService {
 
     if (res.statusCode == 200) {
       var data = json.decode(res.body);
-      print(data);
       return data;
       // return perangkatCustomerModelFromJson(res.body.toString());
     } else {
@@ -103,7 +97,6 @@ class PerangkatCustomerService {
 
     if (res.statusCode == 200) {
       var data = json.decode(res.body);
-      print(data);
       return data;
       // return perangkatCustomerModelFromJson(res.body.toString());
     } else {

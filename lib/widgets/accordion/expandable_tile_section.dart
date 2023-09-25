@@ -1,7 +1,9 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, depend_on_referenced_packages
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, depend_on_referenced_packages, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app_pilar/services/perangkat_customer_service.dart';
+import 'package:mobile_app_pilar/widgets/input/text_button_widget.dart';
+import 'package:mobile_app_pilar/widgets/input/text_field_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:marquee/marquee.dart';
 
@@ -16,18 +18,36 @@ class ExpandableTileSection extends StatefulWidget {
 
 class _ExpandableTileSectionState extends State<ExpandableTileSection> {
   final scrollController = ScrollController();
+
   late Future dataPrimary;
+  late Future dataSecondary;
+  late Future dataForUpdate;
+  TextEditingController searchController = TextEditingController();
+  TextEditingController inputController = TextEditingController();
+  List<dynamic> dataList = [];
+  List<dynamic> dataSecondaryList = [];
+  List<dynamic> dataForUpdateList = [];
+  List<dynamic> filteredData = [];
+  dynamic selectedValueIdKeluar;
   int _currentPage = 1;
+  final int _limit = 10;
   bool hasMore = true;
-  int _limit = 10;
+  bool statusInsertData = false;
+
+  String? updatedNamaLokasi;
+  String? updatedLokasiSerialNumber;
+  String? updatedUsernameSerialNumber;
+  String? updatedPasswordSerialNumber;
+
+  bool statusDeleteData = false;
+  bool statusUpdateData = false;
 
   @override
   void initState() {
     super.initState();
 
     scrollController.addListener(() {
-      if (scrollController.position.maxScrollExtent ==
-          scrollController.offset) {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
         fetch();
       }
     });
@@ -73,222 +93,348 @@ class _ExpandableTileSectionState extends State<ExpandableTileSection> {
             return Container(
                 padding: EdgeInsets.all(0),
                 margin: EdgeInsets.only(bottom: 10),
-                decoration: ShapeDecoration(
-                    color: index % 2 == 0
-                        ? Colors.green.shade300
-                        : Colors.green.shade600,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12))),
+                decoration: ShapeDecoration(color: index % 2 == 0 ? Colors.green.shade300 : Colors.green.shade600, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 child: ExpansionTile(
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         data.namaPelanggan.toString(),
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
+                        style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         data.namaItem.toString(),
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
+                        style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
                   children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        maxHeight: 300,
-                      ),
-                      margin: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(8))),
-                      width: double.maxFinite,
-                      height: 174,
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
+                    Builder(builder: (BuildContext contextExpansionTile) {
+                      return Container(
+                          constraints: BoxConstraints(
+                            maxHeight: 600,
+                          ),
+                          margin: EdgeInsets.all(4),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(8))),
+                          width: double.maxFinite,
+                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
-                                child: TextButtonWidget(
-                                  icon: Icon(Icons.location_on),
-                                  text: Text('Map'),
-                                  style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          Colors.greenAccent)),
-                                  onPressed: () => _launchURL(
-                                      "https://www.google.com/maps/search/${data.lokasiSerialNumber}"),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextButtonWidget(
+                                      icon: Icon(Icons.location_on),
+                                      text: Text('Map'),
+                                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.greenAccent)),
+                                      onPressed: () => _launchURL("https://www.google.com/maps/search/${data.lokasiSerialNumber}"),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Expanded(
+                                    child: TextButtonWidget(
+                                      icon: Icon(Icons.image_rounded),
+                                      text: Text('Gambar'),
+                                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.greenAccent)),
+                                      onPressed: () => showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Gambar Perangkat'),
+                                              content: Image.network("https://app.pilarsolusi.co.id/management/administrasi/gambar/serial_number/${(data.gambarSerialNumber).toString()}"),
+                                            );
+                                          }),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              TextFieldWidget(
+                                textTitle: Text('Username : '),
+                                textSubtitle:
+                                    // Marquee(text: data.usernameSerialNumber),
+                                    Text(
+                                  data.usernameSerialNumber,
+                                  // maxLines: 1,
                                 ),
                               ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: TextButtonWidget(
-                                  icon: Icon(Icons.image_rounded),
-                                  text: Text('Gambar'),
-                                  style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          Colors.greenAccent)),
-                                  onPressed: () => showDialog<String>(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: const Text('Gambar Perangkat'),
-                                          content: Image.network(
-                                              "https://app.pilarsolusi.co.id/management/administrasi/gambar/serial_number/${(data.gambarSerialNumber).toString()}"),
-                                        );
-                                      }),
-                                ),
-                              )
-                            ],
-                          ),
-                          TextFieldWidget(
-                            textTitle: Text('Username : '),
-                            textSubtitle: Text(Marquee(text: '').toString()),
-                          ),
-                          TextFieldWidget(
-                            textTitle: Text('Password : '),
-                            textSubtitle: Text(data.passwordSerialNumber),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButtonWidget(
-                                  icon: Icon(Icons.edit),
-                                  text: Text('Edit'),
-                                  style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          Colors.amber)),
-                                  onPressed: () {},
+                              TextFieldWidget(
+                                textTitle: Text('Password : '),
+                                textSubtitle:
+                                    // Marquee(text: data.passwordSerialNumber),
+                                    Text(
+                                  data.passwordSerialNumber,
+                                  // maxLines: 1,
                                 ),
                               ),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Expanded(
-                                child: TextButtonWidget(
-                                  icon: Icon(Icons.delete),
-                                  text: Text('Hapus'),
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStatePropertyAll(Colors.red)),
-                                  onPressed: () {
-                                    // PerangkatCustomerService()
-                                    //     .deleteData(data.idSerialNumber);
-                                    showDialog<String>(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text(
-                                                'Yakin Ingin Menghapus Data?'),
-                                            content: Column(
-                                              children: [
-                                                TextFieldWidget(
-                                                  textTitle:
-                                                      Text('Username : '),
-                                                  textSubtitle: Text(data
-                                                      .usernameSerialNumber),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextButtonWidget(
+                                      icon: Icon(Icons.edit),
+                                      text: Text('Edit'),
+                                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.amber)),
+                                      onPressed: () => {
+                                        showModalBottomSheet(
+                                            context: context,
+                                            builder: (context) => Padding(
+                                                  padding: const EdgeInsets.all(18.0),
+                                                  child: ListView(
+                                                    scrollDirection: Axis.vertical,
+                                                    children: [
+                                                      Center(
+                                                        child: Text(
+                                                          'Edit Data Perangkat Customer',
+                                                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                                                        ),
+                                                      ),
+                                                      Column(
+                                                        children: [
+                                                          // Text(
+                                                          //     'Lokasi Pelanggan / Nama Item / Qty'),
+                                                          // DropdownButton(
+                                                          //   items: dataSecondaryList.map((data) {
+                                                          //     return DropdownMenuItem(
+                                                          //       value: data.idKeluar,
+                                                          //       child: Text(
+                                                          //           '${data.namaPelanggan} - ${data.namaItem} : ${data.qty}'),
+                                                          //     );
+                                                          //   }).toList(),
+                                                          //   value: idKeluar ?? '',
+                                                          //   onChanged: (newVal) async {
+                                                          //     setState(() {
+                                                          //       idKeluar = newVal.toString();
+                                                          //     });
+                                                          //     print(idKeluar);
+                                                          //   },
+                                                          //   isExpanded: true,
+                                                          // ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      TextFormField(
+                                                        decoration: InputDecoration(
+                                                          labelText: 'Nama Lokasi',
+                                                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+                                                        ),
+                                                        onChanged: (String newNamaLokasi) {
+                                                          setState(() {
+                                                            updatedNamaLokasi = newNamaLokasi;
+                                                            //   widget.data[index].namaLokasi = newNamaLokasi;
+                                                          });
+                                                        },
+                                                        controller: TextEditingController(text: data.namaLokasi.toString()),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      TextFormField(
+                                                        decoration: InputDecoration(
+                                                          labelText: 'Koordinat Perangkat',
+                                                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+                                                        ),
+                                                        onChanged: (String newKoordinatPerangkat) {
+                                                          setState(() {
+                                                            updatedLokasiSerialNumber = newKoordinatPerangkat;
+                                                          });
+                                                        },
+                                                        controller: TextEditingController(text: data.lokasiSerialNumber.toString()),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      TextFormField(
+                                                        decoration: InputDecoration(
+                                                          labelText: 'Username Perangkat',
+                                                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+                                                        ),
+                                                        onChanged: (String newUsernamePerangkat) {
+                                                          setState(() {
+                                                            updatedUsernameSerialNumber = newUsernamePerangkat;
+                                                          });
+                                                        },
+                                                        controller: TextEditingController(text: data.usernameSerialNumber.toString()),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      TextFormField(
+                                                        decoration: InputDecoration(
+                                                          labelText: 'Password Perangkat',
+                                                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2.0)),
+                                                        ),
+                                                        onChanged: (String newPasswordPerangkat) {
+                                                          setState(() {
+                                                            updatedPasswordSerialNumber = newPasswordPerangkat;
+                                                          });
+                                                        },
+                                                        controller: TextEditingController(
+                                                          text: data.passwordSerialNumber.toString(),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          // PerangkatCustomerService().updateData(
+                                                          //   (data.namaTempat ?? data.namaTempat).toString(),
+                                                          //   (data.koordinatPerangkat ?? data.lokasiSerialNumber).toString(),
+                                                          //   (data.usernamePerangkat ?? data.usernamePerangkat).toString(),
+                                                          //   (data.passwordPerangkat ?? data.passwordPerangkat).toString(),
+                                                          //   data.idSerialNumber.toString(),
+                                                          // );
+                                                          PerangkatCustomerService()
+                                                              .updateData((updatedNamaLokasi ?? data.namaLokasi).toString(), (updatedLokasiSerialNumber ?? data.lokasiSerialNumber).toString(),
+                                                                  (updatedUsernameSerialNumber ?? data.usernameSerialNumber).toString(), (updatedPasswordSerialNumber ?? data.passwordSerialNumber).toString(), data.idSerialNumber)
+                                                              .then((value) => {
+                                                                    if (value['status'] == 'success')
+                                                                      {
+                                                                        setState(() {
+                                                                          statusUpdateData = true;
+                                                                          data.namaLokasi = updatedNamaLokasi ?? data.namaLokasi;
+                                                                          data.lokasiSerialNumber = updatedLokasiSerialNumber ?? data.lokasiSerialNumber;
+                                                                          data.usernameSerialNumber = updatedUsernameSerialNumber ?? data.usernameSerialNumber;
+                                                                          data.passwordSerialNumber = updatedPasswordSerialNumber ?? data.passwordSerialNumber;
+                                                                        }),
+                                                                      },
+                                                                  })
+                                                              .whenComplete(() {
+                                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                              content: Text("Data ${statusUpdateData ? 'Berhasil' : 'Gagal'} Di edit"),
+                                                              behavior: SnackBarBehavior.floating,
+                                                              margin: EdgeInsets.all(20),
+                                                              backgroundColor: statusUpdateData ? Colors.green : Colors.red,
+                                                            ));
+                                                            Navigator.pop(context);
+                                                            setState(() {
+                                                              statusUpdateData = false;
+                                                              updatedNamaLokasi = null;
+                                                              updatedLokasiSerialNumber = null;
+                                                              updatedUsernameSerialNumber = null;
+                                                              updatedPasswordSerialNumber = null;
+                                                            });
+                                                          });
+                                                        },
+                                                        child: Text('Edit Data'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )),
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Expanded(
+                                    child: TextButtonWidget(
+                                      icon: Icon(Icons.delete),
+                                      text: Text('Hapus'),
+                                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.red)),
+                                      onPressed: () {
+                                        // PerangkatCustomerService()
+                                        //     .deleteData(data.idSerialNumber);
+                                        showDialog<String>(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text('Konfirmasi Hapus Data'),
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    TextFieldWidget(
+                                                      textTitle: Text('Username : '),
+                                                      textSubtitle: Text(data.usernameSerialNumber),
+                                                    ),
+                                                    TextFieldWidget(
+                                                      textTitle: Text('Password : '),
+                                                      textSubtitle: Text(data.passwordSerialNumber),
+                                                    ),
+                                                    // Text("Index : $index"),
+                                                    // Text("Data : ${data.usernameSerialNumber}"),
+                                                    Row(mainAxisSize: MainAxisSize.max, children: [
+                                                      Expanded(
+                                                        child: TextButtonWidget(
+                                                          icon: Icon(
+                                                            Icons.arrow_back,
+                                                            color: Colors.white,
+                                                            size: 16,
+                                                          ),
+                                                          text: Text(' Kembali', style: TextStyle(color: Colors.white)),
+                                                          style: ButtonStyle(
+                                                            backgroundColor: MaterialStatePropertyAll(Colors.black54),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.pop(context);
+                                                          },
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 8,
+                                                      ),
+                                                      Expanded(
+                                                        child: TextButtonWidget(
+                                                          icon: Icon(
+                                                            Icons.delete,
+                                                            color: Colors.white,
+                                                            size: 16,
+                                                          ),
+                                                          text: Text(' Hapus', style: TextStyle(color: Colors.white)),
+                                                          style: ButtonStyle(
+                                                            backgroundColor: MaterialStatePropertyAll(Colors.red),
+                                                          ),
+                                                          onPressed: () {
+                                                            PerangkatCustomerService().deleteData(data.idSerialNumber).then((value) {
+                                                              setState(() {
+                                                                if (value['status'] == 'success') {
+                                                                  statusDeleteData = true;
+                                                                }
+                                                              });
+                                                            }).whenComplete(() {
+                                                              setState(() {
+                                                                widget.data.removeWhere((item) => item.idSerialNumber == data.idSerialNumber);
+                                                              });
+                                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                                content: Text("Data ${statusDeleteData ? 'Berhasil' : 'Gagal'} Di hapus"),
+                                                                behavior: SnackBarBehavior.floating,
+                                                                margin: EdgeInsets.all(20),
+                                                                backgroundColor: statusDeleteData ? Colors.green : Colors.red,
+                                                              ));
+                                                              ExpansionTileController.of(contextExpansionTile).collapse();
+                                                              Navigator.pop(context);
+                                                              setState(() {
+                                                                statusDeleteData = false;
+                                                              });
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ])
+                                                  ],
                                                 ),
-                                                TextFieldWidget(
-                                                  textTitle:
-                                                      Text('Password : '),
-                                                  textSubtitle: Text(data
-                                                      .passwordSerialNumber),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                  },
-                                ),
-                              )
+                                              );
+                                            });
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
                             ],
-                          ),
-                        ],
-                      ),
-                    )
+                          ));
+                    }),
                   ],
                 ));
           } else {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
-              child: Center(
-                  child: hasMore
-                      ? CircularProgressIndicator()
-                      : Text('No More Data To Load')),
+              child: Center(child: hasMore ? CircularProgressIndicator() : Text('No More Data To Load')),
             );
           }
         });
-  }
-}
-
-class TextFieldWidget extends StatelessWidget {
-  Text textTitle;
-  Text textSubtitle;
-  Color color;
-
-  TextFieldWidget({
-    super.key,
-    required this.textTitle,
-    required this.textSubtitle,
-    this.color = Colors.green,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4),
-      padding: EdgeInsets.all(6),
-      decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.all(Radius.circular(4))),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(child: textTitle),
-          SizedBox(
-            width: 16,
-          ),
-          Expanded(child: textSubtitle),
-        ],
-      ),
-    );
-  }
-}
-
-class TextButtonWidget extends StatelessWidget {
-  Widget icon;
-  Widget text;
-  ButtonStyle style;
-  void Function() onPressed;
-
-  TextButtonWidget({
-    super.key,
-    required this.icon,
-    required this.text,
-    required this.style,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-        onPressed: onPressed,
-        style: style,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            text,
-          ],
-        ));
   }
 }
