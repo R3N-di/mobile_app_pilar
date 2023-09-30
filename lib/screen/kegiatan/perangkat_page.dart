@@ -191,7 +191,9 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                           color: Colors.black,
                         ),
                       )
-                    : ExpandableTileSection(data: filteredData,)),
+                    : ExpandableTileSection(
+                        data: filteredData,
+                      )),
             Positioned(
               top: 20,
               left: 20,
@@ -353,25 +355,65 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                           SizedBox(
                                             height: 12,
                                           ),
+                                          // ElevatedButton(
+                                          //   onPressed: () {
+                                          //     PerangkatCustomerService()
+                                          //         .postData((this.idKeluar).toString(), (this.namaTempat).toString(), (this.koordinatPerangkat).toString(), (this.usernamePerangkat).toString(), (this.passwordPerangkat).toString())
+                                          //         .then((value) {
+                                          //       if (value['status'] == 'success') {
+                                          //         PerangkatCustomerService().getOneData(value['newDataId']).then((value) {
+                                          //           setState(() {
+                                          //             filteredData.addAll(value);
+                                          //             statusInsertData = true;
+                                          //           });
+                                          //         });
+                                          //       }
+                                          //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          //         content: Text("${statusInsertData ? 'Data Berhasil Di Tambah' : value['message']}"),
+                                          //         behavior: SnackBarBehavior.floating,
+                                          //         margin: EdgeInsets.all(20),
+                                          //         backgroundColor: statusInsertData ? Colors.green : Colors.red,
+                                          //       ));
+                                          //     }).whenComplete(() {
+                                          //       setState(() {
+                                          //         selectedValueIdKeluar = null;
+                                          //         this.idKeluar = null;
+                                          //         statusInsertData = false;
+                                          //       });
+                                          //     });
+
+                                          //     Navigator.pop(context);
+                                          //   },
+                                          //   child: Text('Tambah Data'),
+                                          // ),
                                           ElevatedButton(
                                             onPressed: () {
                                               PerangkatCustomerService()
                                                   .postData((this.idKeluar).toString(), (this.namaTempat).toString(), (this.koordinatPerangkat).toString(), (this.usernamePerangkat).toString(), (this.passwordPerangkat).toString())
                                                   .then((value) {
                                                 if (value['status'] == 'success') {
-                                                  PerangkatCustomerService().getOneData(value['newDataId']).then((value) {
-                                                    setState(() {
-                                                      filteredData.addAll(value);
-                                                      statusInsertData = true;
+                                                  try {
+                                                    PerangkatCustomerService().getOneData(value['newDataId']).then((value) {
+                                                      setState(() {
+                                                        filteredData.addAll(value);
+                                                        statusInsertData = true;
+                                                      });
                                                     });
-                                                  });
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                      content: Text("Data Gagal Ditambah! ${e}"),
+                                                      behavior: SnackBarBehavior.floating,
+                                                      margin: EdgeInsets.all(20),
+                                                      backgroundColor: Colors.red,
+                                                    ));
+                                                  }
                                                 }
-                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                  content: Text("${statusInsertData ? 'Data Berhasil Di Tambah' : value['message']}"),
-                                                  behavior: SnackBarBehavior.floating,
-                                                  margin: EdgeInsets.all(20),
-                                                  backgroundColor: statusInsertData ? Colors.green : Colors.red,
-                                                ));
+                                                // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                //   content: Text("${statusInsertData ? 'Data Berhasil Di Tambah' : value['message']}"),
+                                                //   behavior: SnackBarBehavior.floating,
+                                                //   margin: EdgeInsets.all(20),
+                                                //   backgroundColor: statusInsertData ? Colors.green : Colors.red,
+                                                // ));
                                               }).whenComplete(() {
                                                 setState(() {
                                                   selectedValueIdKeluar = null;
@@ -379,7 +421,20 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                                   statusInsertData = false;
                                                 });
                                               });
-
+                                              try {
+                                                filteredData = [];
+                                                dataList = [];
+                                                dataPrimary = PerangkatCustomerService().getData(_defaultPage, _limit);
+                                                dataPrimary.then((value) {
+                                                  setState(() {
+                                                    _currentPage = 2;
+                                                    dataList = value;
+                                                    filteredData = value;
+                                                  });
+                                                });
+                                              } catch (e) {
+                                                print(e);
+                                              }
                                               Navigator.pop(context);
                                             },
                                             child: Text('Tambah Data'),
