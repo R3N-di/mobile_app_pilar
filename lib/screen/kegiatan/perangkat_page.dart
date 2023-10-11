@@ -9,9 +9,14 @@ import 'package:accordion/accordion.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_app_pilar/widgets/accordion/expandable_tile_section.dart';
 import 'package:mobile_app_pilar/widgets/search_input.dart';
+import 'package:mobile_app_pilar/widgets/action_button_row.dart';
+import 'package:mobile_app_pilar/widgets/accordion/title_text_accordion.dart';
+import 'package:mobile_app_pilar/widgets/accordion/text_field_accordion.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:number_paginator/number_paginator.dart';
+import 'package:marquee/marquee.dart';
+
 
 class PerangkatCustomerPage extends StatefulWidget {
   @override
@@ -33,6 +38,7 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
   int _defaultPage = 1;
   int _limit = 10;
   bool hasMore = true;
+  final scrollController = ScrollController();
 
   // SECTION PROPERTY dan METHOD Perangkat Customer
   String? idKeluar;
@@ -89,7 +95,29 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
         dataSecondaryList = value;
       });
     });
+    scrollController.addListener(() {
+      if (scrollController.position.maxScrollExtent ==
+          scrollController.offset) {
+        fetch();
+      }
+    });
     super.initState();
+  }
+
+  Future fetch() async {
+    dataPrimary = PerangkatCustomerService().getData(_currentPage, _limit);
+    dataPrimary.then((data) {
+      final List newItems = data;
+      setState(() {
+        _currentPage++;
+
+        if (newItems.length < _limit) {
+          hasMore = false;
+        }
+
+        filteredData.addAll(newItems);
+      });
+    });
   }
 
   final _headerStyle = const TextStyle(
@@ -187,9 +215,115 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                           color: Colors.black,
                         ),
                       )
-                    : ExpandableTileSection(
-                        data: filteredData,
-                      )),
+                    : ListView.builder(
+                          padding: EdgeInsets.only(
+                            top: 80,
+                            right: 20,
+                            left: 20,
+                            bottom: 20,
+                          ),
+                          itemCount: filteredData.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index < filteredData.length) {
+                              final data = filteredData[index];
+                              return ExpandableTileSection(
+                                data: filteredData, // Replace with your filtered data
+                                header: [
+                                  TitleTextWidget(
+                                    texts: [data.namaPelanggan.toString(), data.namaItem.toString()],
+                                    textStyles: [
+                                      TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
+                                      TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
+                                    ],
+                                  )
+                                ],
+                                content: [
+                                  ActionButtonsRow(
+                                    actionButtons: [
+                                      ActionButton(
+                                        icon: Icon(
+                                          Icons.location_on,
+                                          color: Colors.blue,
+                                        ),
+                                        label: 'Edit 1',
+                                        bgcolor: Colors.greenAccent,
+                                        color: Colors.black,
+                                        onPressed: () => _launchURL(
+                                              "https://www.google.com/maps/search/${data.lokasiSerialNumber}"
+                                        ),
+                                      ),
+                                      ActionButton(
+                                        icon: Icon(
+                                          Icons.image_rounded,
+                                          color: Colors.blue,
+                                        ),
+                                        label: 'Hapus 1',
+                                        bgcolor: Colors.greenAccent,
+                                        color: Colors.black,
+                                        onPressed: () => showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Gambar Perangkat'),
+                                              content: Image.network(
+                                                  "https://app.pilarsolusi.co.id/management/administrasi/gambar/serial_number/${(data.gambarSerialNumber).toString()}"),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  TextFieldWidget(
+                                    textTitle: Text('Username : '),
+                                    textSubtitle: Text(Marquee(text: '').toString()),
+                                  ),
+                                  TextFieldWidget(
+                                    textTitle: Text('Password : '),
+                                    textSubtitle: Text(data.passwordSerialNumber),
+                                  ),
+                                  ActionButtonsRow(
+                                    actionButtons: [
+                                      ActionButton(
+                                        icon: Icon(
+                                          Icons.edit,
+                                          color: Colors.blue,
+                                        ),
+                                        label: 'Edit 1',
+                                        bgcolor: Colors.amber,
+                                        color: Colors.black,
+                                        onPressed: () {
+                                          // Tangani aksi saat tombol Edit ditekan
+                                        },
+                                      ),
+                                      ActionButton(
+                                        icon: Icon(
+                                          Icons.delete,
+                                          color: Colors.blue,
+                                        ),
+                                        label: 'Hapus 1',
+                                        bgcolor: Colors.red,
+                                        color: Colors.black,
+                                        onPressed: () {
+                                          // Tangani aksi saat tombol Hapus ditekan
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              );
+                            } else {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 32),
+                                child: Center(
+                                  child: hasMore
+                                      ? CircularProgressIndicator()
+                                      : Text('No More Data To Load'),
+                                ),
+                              );
+                            }
+                          },
+                        )
+                      ),
             Positioned(
               top: 20,
               left: 20,
@@ -410,7 +544,7 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
                                             ),
                                             onChanged:
                                                 (String passwordPerangkat) {
-                                              this.passwordPerangkat =
+                                              // this.passwordPerangkat =
                                                   passwordPerangkat;
                                             },
                                           ),
@@ -459,6 +593,9 @@ class _PerangkatCustomerPageState extends State<PerangkatCustomerPage> {
         ));
   }
 }
+
+
+
 
 
 // class AddPerangkatCustomer extends StatefulWidget {
