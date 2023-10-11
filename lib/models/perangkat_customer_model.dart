@@ -10,39 +10,39 @@ List<PerangkatCustomerModel> perangkatCustomerModelFromJson(String str) => List<
 String perangkatCustomerModelToJson(List<PerangkatCustomerModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class PerangkatCustomerModel {
-    final String? idKeluar;
-    final String? idbarang;
-    final String? penerima;
-    final String? tanggalKeluar;
-    final String? idPelanggan;
-    final String? namaPelanggan;
-    final String? namaItem;
-    final String? deletedAt;
-    final String? namaLokasi;
-    final String? lokasiSerialNumber;
-    final String? idSerialNumber;
-    final String? gambarSerialNumber;
-    final String? usernameSerialNumber;
-    final String? passwordSerialNumber;
+  final String? idKeluar;
+  final String? idbarang;
+  final String? penerima;
+  final String? tanggalKeluar;
+  final String? idPelanggan;
+  final String? namaPelanggan;
+  final String? namaItem;
+  final String? deletedAt;
+  String? namaLokasi;
+  String? lokasiSerialNumber;
+  final String? idSerialNumber;
+  final String? gambarSerialNumber;
+  String? usernameSerialNumber;
+  String? passwordSerialNumber;
 
-    PerangkatCustomerModel({
-        required this.idKeluar,
-        required this.idbarang,
-        required this.penerima,
-        required this.tanggalKeluar,
-        required this.idPelanggan,
-        required this.namaPelanggan,
-        required this.namaItem,
-        required this.deletedAt,
-        required this.namaLokasi,
-        required this.lokasiSerialNumber,
-        required this.idSerialNumber,
-        required this.gambarSerialNumber,
-        required this.usernameSerialNumber,
-        required this.passwordSerialNumber,
-    });
+  PerangkatCustomerModel({
+    required this.idKeluar,
+    required this.idbarang,
+    required this.penerima,
+    required this.tanggalKeluar,
+    required this.idPelanggan,
+    required this.namaPelanggan,
+    required this.namaItem,
+    required this.deletedAt,
+    required this.namaLokasi,
+    required this.lokasiSerialNumber,
+    required this.idSerialNumber,
+    required this.gambarSerialNumber,
+    required this.usernameSerialNumber,
+    required this.passwordSerialNumber,
+  });
 
-    factory PerangkatCustomerModel.fromJson(Map<String, dynamic> json) => PerangkatCustomerModel(
+  factory PerangkatCustomerModel.fromJson(Map<String, dynamic> json) => PerangkatCustomerModel(
         idKeluar: json["id_keluar"],
         idbarang: json["idbarang"],
         penerima: json["penerima"],
@@ -57,9 +57,9 @@ class PerangkatCustomerModel {
         gambarSerialNumber: json["gambar_serial_number"],
         usernameSerialNumber: json["username_serial_number"],
         passwordSerialNumber: json["password_serial_number"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id_keluar": idKeluar,
         "idbarang": idbarang,
         "penerima": penerima,
@@ -74,5 +74,9 @@ class PerangkatCustomerModel {
         "gambar_serial_number": gambarSerialNumber,
         "username_serial_number": usernameSerialNumber,
         "password_serial_number": passwordSerialNumber,
-    };
+      };
+
+// void updatenamaLokasi(String newName) {
+//   namaLokasi = newName;
+// }
 }

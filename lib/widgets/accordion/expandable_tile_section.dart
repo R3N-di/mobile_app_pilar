@@ -1,7 +1,9 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, depend_on_referenced_packages
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, depend_on_referenced_packages, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:mobile_app_pilar/services/perangkat_customer_service.dart';
+import 'package:mobile_app_pilar/widgets/input/text_button_widget.dart';
+import 'package:mobile_app_pilar/widgets/input/text_field_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:marquee/marquee.dart';
 
@@ -17,15 +19,40 @@ class ExpandableTileSection extends StatefulWidget {
 }
 
 class _ExpandableTileSectionState extends State<ExpandableTileSection> {
-  // final scrollController = ScrollController();
+  final scrollController = ScrollController();
+
   late Future dataPrimary;
+  late Future dataSecondary;
+  late Future dataForUpdate;
+  TextEditingController searchController = TextEditingController();
+  TextEditingController inputController = TextEditingController();
+  List<dynamic> dataList = [];
+  List<dynamic> dataSecondaryList = [];
+  List<dynamic> dataForUpdateList = [];
+  List<dynamic> filteredData = [];
+  dynamic selectedValueIdKeluar;
   int _currentPage = 1;
+  final int _limit = 10;
   bool hasMore = true;
-  int _limit = 10;
+  bool statusInsertData = false;
+
+  String? updatedNamaLokasi;
+  String? updatedLokasiSerialNumber;
+  String? updatedUsernameSerialNumber;
+  String? updatedPasswordSerialNumber;
+
+  bool statusDeleteData = false;
+  bool statusUpdateData = false;
 
   @override
   void initState() {
     super.initState();
+
+    scrollController.addListener(() {
+      if (scrollController.position.maxScrollExtent == scrollController.offset) {
+        fetch();
+      }
+    });
   }
 
   // Future fetch() async {
@@ -68,13 +95,7 @@ class _ExpandableTileSectionState extends State<ExpandableTileSection> {
             return Container(
                 padding: EdgeInsets.all(0),
                 margin: EdgeInsets.only(bottom: 10),
-                decoration: ShapeDecoration(
-                    color: Colors.green.shade300,
-                    // color: index % 2 == 0
-                    //     ? Colors.green.shade300
-                    //     : Colors.green.shade600,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12))),
+                decoration: ShapeDecoration(color: index % 2 == 0 ? Colors.green.shade300 : Colors.green.shade600, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 child: ExpansionTile(
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
